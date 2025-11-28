@@ -4,27 +4,36 @@ const { query } = require('../config/database');
 class Floreria {
   // crear florería
   static async create(floreriaData) {
-    const {
-      nombre,
-      descripcion,
-      logo,
-      ubicacion,
-      /*telefono,
-      email,
-      horario,*/
-      estatus = 'activo',
-      id_ciudad,
-      id_usuario
+let { 
+        nombre, 
+        descripcion = null,   
+        logo = null,
+        direccion = null,
+        estatus = 1,       
+        id_ciudad, 
+        id_usuario,      
+        email = null,
+        telefono,
+        horario = null
     } = floreriaData;
+
+    if (estatus === 'activo') {
+        estatus = 1;
+    } else if (estatus === 'inactivo') {
+        estatus = 0;
+    } else {
+        // Si no es ni activo ni inactivo, o viene vacío, aseguramos que sea 1 (o el número que venga)
+        estatus = (estatus === undefined || estatus === null) ? 1 : parseInt(estatus);
+    }
 
     const sql = `
       INSERT INTO florerias 
-      (nombre, descripcion, logo, ubicacion, estatus, id_ciudad, id_usuario) 
+      (nombre, descripcion, logo, direccion, estatus, id_ciudad, id_usuario, email, telefono, horario) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await query(sql, [
-      nombre, descripcion, logo, ubicacion, telefono, correo, horario, estatus, id_ciudad, id_usuario
+      nombre, descripcion, logo, direccion, telefono, email, horario, estatus, id_ciudad, id_usuario
     ]);
 
     return this.findById(result.insertId);
@@ -88,8 +97,7 @@ class Floreria {
       FROM florerias f
       INNER JOIN ciudades c ON f.id_ciudad = c.id
       INNER JOIN usuarios u ON f.id_usuario = u.id
-      ${whereClause}
-      ORDER BY f.created_at DESC
+      ${whereClause},
       LIMIT ? OFFSET ?
     `;
 

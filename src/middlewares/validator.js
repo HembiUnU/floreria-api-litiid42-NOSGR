@@ -33,10 +33,18 @@ const floreriaSchema = Joi.object({
   }),
   descripcion: Joi.string().max(1000).allow('', null),
   ubicacion: Joi.string().max(255).allow('', null),
- /* telefono: Joi.string().max(20).allow('', null),
+  telefono: Joi.string().max(20).allow('', null),
   email: Joi.string().email().allow('', null),
-  horario: Joi.string().max(100).allow('', null),*/
-  estatus: Joi.string().valid(0,1,2).default(1),
+  horario: Joi.string().max(100).allow('', null),
+  
+  // Ahora aceptamos "activo/inactivo" (lo que manda Swagger)
+  // Y también "1/0" (por si lo mandas directo como número)
+  estatus: Joi.alternatives().try(
+      Joi.string().valid('activo', 'inactivo', 'pendiente', '1', '0', '2'),
+      Joi.number().valid(1, 0, 2)
+  ).default(1),
+  // -----------------------
+
   id_ciudad: Joi.number().integer().required().messages({
     'number.base': 'El ID de ciudad debe ser un número',
     'any.required': 'El ID de ciudad es obligatorio'
